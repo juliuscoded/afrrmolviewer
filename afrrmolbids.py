@@ -746,9 +746,10 @@ def plot_daily_mols_for_product(processed_df, product, data_market='ENERGY'):
 # ----------------------
 # VWAP Price Trend for a Product
 # ----------------------
-def plot_vwap_price_trend(processed_df, product, data_market='ENERGY'):
+def plot_boxplot_price_trend(processed_df, product, data_market='ENERGY'):
     """
-    Plot VWAP price trend for a product with confidence band (std dev).
+    Plot a box plot of bid prices for each day for the selected product.
+    Optionally overlay the VWAP as a line.
     """
     if processed_df is None or len(processed_df) == 0:
         return None
@@ -762,46 +763,42 @@ def plot_vwap_price_trend(processed_df, product, data_market='ENERGY'):
     if 'DATE' not in filtered_df.columns:
         filtered_df['DATE'] = pd.to_datetime(filtered_df['DOWNLOAD_DATE'])
     
-    # Group by day and calculate VWAP and std
+    price_unit = filtered_df['PRICE_UNIT'].iloc[0]
+    
+    # Prepare data for box plot
+    filtered_df['Day'] = filtered_df['DATE'].dt.date
+    
+    fig = go.Figure()
+    # Box plot for each day
+    for day in sorted(filtered_df['Day'].unique()):
+        day_df = filtered_df[filtered_df['Day'] == day]
+        fig.add_trace(go.Box(
+            y=day_df['SIGNED_PRICE'],
+            x=[day] * len(day_df),
+            name=str(day),
+            boxpoints='outliers',
+            marker_color='blue',
+            line=dict(width=1),
+            showlegend=False
+        ))
+    # Optionally overlay VWAP as a line
     def vwap(group):
         v = group['CAPACITY_COL']
         p = group['SIGNED_PRICE']
         return (p * v).sum() / v.sum() if v.sum() != 0 else np.nan
-    
-    daily = filtered_df.groupby(filtered_df['DATE'].dt.date).apply(
-        lambda g: pd.Series({
-            'VWAP': vwap(g),
-            'STD': g['SIGNED_PRICE'].std(),
-            'COUNT': len(g)
-        })
-    ).reset_index().rename(columns={'DATE': 'Day'})
-    
-    price_unit = filtered_df['PRICE_UNIT'].iloc[0]
-    
-    fig = go.Figure()
-    # VWAP line
+    vwap_by_day = filtered_df.groupby('Day').apply(vwap)
     fig.add_trace(go.Scatter(
-        x=daily['Day'],
-        y=daily['VWAP'],
+        x=vwap_by_day.index,
+        y=vwap_by_day.values,
         mode='lines+markers',
         name='VWAP',
-        line=dict(color='blue', width=2),
+        line=dict(color='orange', width=2),
         marker=dict(size=6)
     ))
-    # Confidence band (VWAP ± STD)
-    fig.add_trace(go.Scatter(
-        x=list(daily['Day']) + list(daily['Day'])[::-1],
-        y=list(daily['VWAP'] + daily['STD']) + list((daily['VWAP'] - daily['STD'])[::-1]),
-        fill='toself',
-        fillcolor='rgba(0,100,200,0.15)',
-        line=dict(color='rgba(255,255,255,0)'),
-        name='±1 STD',
-        showlegend=True
-    ))
     fig.update_layout(
-        title=f"VWAP Price Trend for {product}",
+        title=f"Bid Price Distribution (Box Plot) for {product}",
         xaxis_title="Date",
-        yaxis_title=f"VWAP Price ({price_unit})",
+        yaxis_title=f"Bid Price ({price_unit})",
         height=500,
         template="plotly_white",
         hovermode="x unified"
@@ -1187,11 +1184,11 @@ if lt_energy_df is not None or lt_capacity_df is not None:
                         if daily_mol_fig:
                             st.plotly_chart(daily_mol_fig, use_container_width=True)
                         
-                        # 2. VWAP price trend
-                        st.write(f"#### VWAP Price Trend for {selected_product}")
-                        vwap_fig = plot_vwap_price_trend(energy_analysis['processed_df'], selected_product, 'ENERGY')
-                        if vwap_fig:
-                            st.plotly_chart(vwap_fig, use_container_width=True)
+                        # 2. Box plot of bid prices
+                        st.write(f"#### Bid Price Distribution (Box Plot) for {selected_product}")
+                        boxplot_fig = plot_boxplot_price_trend(energy_analysis['processed_df'], selected_product, 'ENERGY')
+                        if boxplot_fig:
+                            st.plotly_chart(boxplot_fig, use_container_width=True)
                         
                         # 3. Capacity trend
                         st.write(f"#### Capacity Trends Over Time for {selected_product}")
@@ -1243,11 +1240,11 @@ if lt_energy_df is not None or lt_capacity_df is not None:
                         if daily_mol_fig:
                             st.plotly_chart(daily_mol_fig, use_container_width=True)
                         
-                        # 2. VWAP price trend
-                        st.write(f"#### VWAP Price Trend for {selected_product}")
-                        vwap_fig = plot_vwap_price_trend(capacity_analysis['processed_df'], selected_product, 'CAPACITY')
-                        if vwap_fig:
-                            st.plotly_chart(vwap_fig, use_container_width=True)
+                        # 2. Box plot of bid prices
+                        st.write(f"#### Bid Price Distribution (Box Plot) for {selected_product}")
+                        boxplot_fig = plot_boxplot_price_trend(capacity_analysis['processed_df'], selected_product, 'CAPACITY')
+                        if boxplot_fig:
+                            st.plotly_chart(boxplot_fig, use_container_width=True)
                         
                         # 3. Capacity trend
                         st.write(f"#### Capacity Trends Over Time for {selected_product}")
