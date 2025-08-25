@@ -961,7 +961,7 @@ def plot_daily_merit_order_curves(processed_df, market_type='NEG', data_market='
                 len=0.75,
                 y=0.5,
                 yanchor='middle',
-                x=1.02,
+                x=1.08,
                 xanchor='left',
             ),
             size=0.1,
@@ -981,7 +981,7 @@ def plot_daily_merit_order_curves(processed_df, market_type='NEG', data_market='
         template="plotly_white",
         showlegend=True,  # Enable legend
         legend=dict(
-            x=1.02,
+            x=1.15,
             y=0.5,
             yanchor='middle',
             xanchor='left',
@@ -1560,67 +1560,25 @@ if energy_df is not None or capacity_df is not None:
                     
                     with energy_tab1:
                         st.write("#### All Negative aFRR Energy Merit Order Curves")
-                        
-                        # Individual MOL selection controls
-                        st.write("**Select which MOLs to display:**")
-                        neg_products = sorted([p for p in processed_energy_df['PRODUCT'].unique() if 'NEG' in p])
-                        if neg_products:
-                            # Create columns for better layout
-                            cols = st.columns(4)
-                            selected_neg_products = []
-                            
-                            for i, product in enumerate(neg_products):
-                                col_idx = i % 4
-                                with cols[col_idx]:
-                                    if st.checkbox(f"{product}", value=True, key=f"neg_energy_{product}"):
-                                        selected_neg_products.append(product)
-                            
-                            if not selected_neg_products:
-                                st.warning("Please select at least one MOL to display")
-                            else:
-                                # Filter data for selected products
-                                filtered_neg_df = processed_energy_df[processed_energy_df['PRODUCT'].isin(selected_neg_products)]
-                                
-                                fig_neg = plot_daily_merit_order_curves(filtered_neg_df, market_type='NEG', data_market='ENERGY')
-                                if fig_neg:
-                                    st.plotly_chart(fig_neg, use_container_width=True)
-                                    if st.button("Download NEG Energy MOL Plot as HTML", key="neg_energy_html"):
-                                        tmpfile = tempfile.NamedTemporaryFile(delete=False, suffix='.html')
-                                        fig_neg.write_html(tmpfile.name)
-                                        with open(tmpfile.name, "rb") as f:
-                                            st.download_button("Download HTML", f, file_name="neg_energy_mol.html")
+                        fig_neg = plot_daily_merit_order_curves(processed_energy_df, market_type='NEG', data_market='ENERGY')
+                        if fig_neg:
+                            st.plotly_chart(fig_neg, use_container_width=True)
+                            if st.button("Download NEG Energy MOL Plot as HTML", key="neg_energy_html"):
+                                tmpfile = tempfile.NamedTemporaryFile(delete=False, suffix='.html')
+                                fig_neg.write_html(tmpfile.name)
+                                with open(tmpfile.name, "rb") as f:
+                                    st.download_button("Download HTML", f, file_name="neg_energy_mol.html")
                     
                     with energy_tab2:
                         st.write("#### All Positive aFRR Energy Merit Order Curves")
-                        
-                        # Individual MOL selection controls
-                        st.write("**Select which MOLs to display:**")
-                        pos_products = sorted([p for p in processed_energy_df['PRODUCT'].unique() if 'POS' in p])
-                        if pos_products:
-                            # Create columns for better layout
-                            cols = st.columns(4)
-                            selected_pos_products = []
-                            
-                            for i, product in enumerate(pos_products):
-                                col_idx = i % 4
-                                with cols[col_idx]:
-                                    if st.checkbox(f"{product}", value=True, key=f"pos_energy_{product}"):
-                                        selected_pos_products.append(product)
-                            
-                            if not selected_pos_products:
-                                st.warning("Please select at least one MOL to display")
-                            else:
-                                # Filter data for selected products
-                                filtered_pos_df = processed_energy_df[processed_energy_df['PRODUCT'].isin(selected_pos_products)]
-                                
-                                fig_pos = plot_daily_merit_order_curves(filtered_pos_df, market_type='POS', data_market='ENERGY')
-                                if fig_pos:
-                                    st.plotly_chart(fig_pos, use_container_width=True)
-                                    if st.button("Download POS Energy MOL Plot as HTML", key="pos_energy_html"):
-                                        tmpfile = tempfile.NamedTemporaryFile(delete=False, suffix='.html')
-                                        fig_pos.write_html(tmpfile.name)
-                                        with open(tmpfile.name, "rb") as f:
-                                            st.download_button("Download HTML", f, file_name="pos_energy_mol.html")
+                        fig_pos = plot_daily_merit_order_curves(processed_energy_df, market_type='POS', data_market='ENERGY')
+                        if fig_pos:
+                            st.plotly_chart(fig_pos, use_container_width=True)
+                            if st.button("Download POS Energy MOL Plot as HTML", key="pos_energy_html"):
+                                tmpfile = tempfile.NamedTemporaryFile(delete=False, suffix='.html')
+                                fig_pos.write_html(tmpfile.name)
+                                with open(tmpfile.name, "rb") as f:
+                                    st.download_button("Download HTML", f, file_name="pos_energy_mol.html")
                     
                     with energy_tab3:
                         st.write("#### Select an Energy Product to Visualize its MOL")
@@ -1779,67 +1737,25 @@ if energy_df is not None or capacity_df is not None:
                     
                     with capacity_tab1:
                         st.write("#### All Negative aFRR Capacity Merit Order Curves")
-                        
-                        # Individual MOL selection controls
-                        st.write("**Select which MOLs to display:**")
-                        neg_capacity_products = sorted([p for p in processed_capacity_df['PRODUCT'].unique() if 'NEG' in p])
-                        if neg_capacity_products:
-                            # Create columns for better layout
-                            cols = st.columns(4)
-                            selected_neg_capacity_products = []
-                            
-                            for i, product in enumerate(neg_capacity_products):
-                                col_idx = i % 4
-                                with cols[col_idx]:
-                                    if st.checkbox(f"{product}", value=True, key=f"neg_capacity_{product}"):
-                                        selected_neg_capacity_products.append(product)
-                            
-                            if not selected_neg_capacity_products:
-                                st.warning("Please select at least one MOL to display")
-                            else:
-                                # Filter data for selected products
-                                filtered_neg_capacity_df = processed_capacity_df[processed_capacity_df['PRODUCT'].isin(selected_neg_capacity_products)]
-                                
-                                fig_neg = plot_daily_merit_order_curves(filtered_neg_capacity_df, market_type='NEG', data_market='CAPACITY')
-                                if fig_neg:
-                                    st.plotly_chart(fig_neg, use_container_width=True)
-                                    if st.button("Download NEG Capacity MOL Plot as HTML", key="neg_capacity_html"):
-                                        tmpfile = tempfile.NamedTemporaryFile(delete=False, suffix='.html')
-                                        fig_neg.write_html(tmpfile.name)
-                                        with open(tmpfile.name, "rb") as f:
-                                            st.download_button("Download HTML", f, file_name="neg_capacity_mol.html")
+                        fig_neg = plot_daily_merit_order_curves(processed_capacity_df, market_type='NEG', data_market='CAPACITY')
+                        if fig_neg:
+                            st.plotly_chart(fig_neg, use_container_width=True)
+                            if st.button("Download NEG Capacity MOL Plot as HTML", key="neg_capacity_html"):
+                                tmpfile = tempfile.NamedTemporaryFile(delete=False, suffix='.html')
+                                fig_neg.write_html(tmpfile.name)
+                                with open(tmpfile.name, "rb") as f:
+                                    st.download_button("Download HTML", f, file_name="neg_capacity_mol.html")
                     
                     with capacity_tab2:
                         st.write("#### All Positive aFRR Capacity Merit Order Curves")
-                        
-                        # Individual MOL selection controls
-                        st.write("**Select which MOLs to display:**")
-                        pos_capacity_products = sorted([p for p in processed_capacity_df['PRODUCT'].unique() if 'POS' in p])
-                        if pos_capacity_products:
-                            # Create columns for better layout
-                            cols = st.columns(4)
-                            selected_pos_capacity_products = []
-                            
-                            for i, product in enumerate(pos_capacity_products):
-                                col_idx = i % 4
-                                with cols[col_idx]:
-                                    if st.checkbox(f"{product}", value=True, key=f"pos_capacity_{product}"):
-                                        selected_pos_capacity_products.append(product)
-                            
-                            if not selected_pos_capacity_products:
-                                st.warning("Please select at least one MOL to display")
-                            else:
-                                # Filter data for selected products
-                                filtered_pos_capacity_df = processed_capacity_df[processed_capacity_df['PRODUCT'].isin(selected_pos_capacity_products)]
-                                
-                                fig_pos = plot_daily_merit_order_curves(filtered_pos_capacity_df, market_type='POS', data_market='CAPACITY')
-                                if fig_pos:
-                                    st.plotly_chart(fig_pos, use_container_width=True)
-                                    if st.button("Download POS Capacity MOL Plot as HTML", key="pos_capacity_html"):
-                                        tmpfile = tempfile.NamedTemporaryFile(delete=False, suffix='.html')
-                                        fig_pos.write_html(tmpfile.name)
-                                        with open(tmpfile.name, "rb") as f:
-                                            st.download_button("Download HTML", f, file_name="pos_capacity_mol.html")
+                        fig_pos = plot_daily_merit_order_curves(processed_capacity_df, market_type='POS', data_market='CAPACITY')
+                        if fig_pos:
+                            st.plotly_chart(fig_pos, use_container_width=True)
+                            if st.button("Download POS Capacity MOL Plot as HTML", key="pos_capacity_html"):
+                                tmpfile = tempfile.NamedTemporaryFile(delete=False, suffix='.html')
+                                fig_pos.write_html(tmpfile.name)
+                                with open(tmpfile.name, "rb") as f:
+                                    st.download_button("Download HTML", f, file_name="pos_capacity_mol.html")
                     
                     with capacity_tab3:
                         st.write("#### Select a Capacity Product to Visualize its MOL")
