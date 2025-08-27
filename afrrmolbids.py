@@ -1594,7 +1594,6 @@ if energy_df is not None or capacity_df is not None:
                             with col3:
                                 overlay_activation = st.checkbox("Overlay 4s Activation Data", value=False, key="overlay_activation")
                             
-                            selected_date = st.session_state.get('selected_date', datetime.now().date())
                             fig = plot_merit_order_list(processed_energy_df, product, y_axis_scale=y_axis_scale, max_y_scale=max_y_scale if y_axis_scale == "fixed" else None)
                             if fig:
                                 if overlay_activation:
